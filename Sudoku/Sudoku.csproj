@@ -45,6 +45,7 @@
     <Compile Include="Katio.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="SingleClass.cs" />
     <Compile Include="SudokuBoard.cs" />
     <Compile Include="SudokuBoardMatcher.cs" />
   </ItemGroup>

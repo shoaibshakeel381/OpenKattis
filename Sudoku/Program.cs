@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Kattis.IO;
 
 namespace Sudoku
@@ -16,10 +17,52 @@ namespace Sudoku
 
             program.TakeUserInput();
 
+            // Just for handling JIT
+            var stopWatch = Stopwatch.StartNew();
+            stopWatch.Stop();
+
             for (var i = 0; i < program.CompletedBoards.Count; i++)
             {
-                var matcher = new SudokuBoardMatcher(program.CompletedBoards[i]);
-                Console.WriteLine(matcher.IsADerivedBoard(program.IncompleteBoards[i]) ? "Yes" : "No");
+                //Console.WriteLine("First Board: ");
+                //Console.WriteLine(program.CompletedBoards[i].ToString());
+
+                //Console.WriteLine("First Board (Rotated): ");
+                //stopWatch = Stopwatch.StartNew();
+                //Console.WriteLine(program.CompletedBoards[i].RotateClockwise().ToString());
+                //stopWatch.Stop();
+                //Console.WriteLine("Total Elapsed Time: " + stopWatch.ElapsedMilliseconds);
+
+                //Console.WriteLine("First Board (Swap Row Segment 0<->2): ");
+                //stopWatch = Stopwatch.StartNew();
+                //Console.WriteLine(program.CompletedBoards[i].SwapRowSegment(0, 2).ToString());
+                //stopWatch.Stop();
+                //Console.WriteLine("Total Elapsed Time: " + stopWatch.ElapsedMilliseconds);
+
+                //Console.WriteLine("First Board (Swap Column Segment 0<->2): ");
+                //stopWatch = Stopwatch.StartNew();
+                //Console.WriteLine(program.CompletedBoards[i].SwapColumnSegment(0, 2).ToString());
+                //stopWatch.Stop();
+                //Console.WriteLine("Total Elapsed Time: " + stopWatch.ElapsedMilliseconds);
+
+                //Console.WriteLine("First Board (Swap Rows 8<->7): ");
+                //stopWatch = Stopwatch.StartNew();
+                //Console.WriteLine(program.CompletedBoards[i].SwapRows(0, 2).ToString());
+                //stopWatch.Stop();
+                //Console.WriteLine("Total Elapsed Time: " + stopWatch.ElapsedMilliseconds);
+
+                //Console.WriteLine("First Board (Swap Columns 4<->6): ");
+                //stopWatch = Stopwatch.StartNew();
+                //Console.WriteLine(program.CompletedBoards[i].SwapColumns(0, 2).ToString());
+                //stopWatch.Stop();
+                //Console.WriteLine("Total Elapsed Time: " + stopWatch.ElapsedMilliseconds);
+
+                //break;
+
+                var matcher = new SudokuBoardMatcher();
+                stopWatch = Stopwatch.StartNew();
+                Console.WriteLine(matcher.Match(program.CompletedBoards[i], program.IncompleteBoards[i]) ? "Yes" : "No");
+                stopWatch.Stop();
+                Console.WriteLine("Total Elapsed Time: " + stopWatch.ElapsedMilliseconds);
             }
         }
 

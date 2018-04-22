@@ -5,8 +5,13 @@ namespace Sudoku
 {
     internal class SudokuBoard
     {
-        private readonly int[,] _data;
+        private int[,] _data;
         public const int MAX_CELLS = 9;
+        
+        public SudokuBoard()
+        {
+            _data = new int[MAX_CELLS, MAX_CELLS];
+        }
 
         public SudokuBoard(IReadOnlyList<string> rows)
         {
@@ -15,14 +20,9 @@ namespace Sudoku
             {
                 for (var j = 0; j < rows[i].Length; j++)
                 {
-                    _data[i, j] = int.Parse(rows[i][j].ToString());
+                    this[i, j] = int.Parse(rows[i][j].ToString());
                 }
             }
-        }
-
-        public SudokuBoard(int[,] data)
-        {
-            _data = data;
         }
 
         /// <summary>
@@ -31,63 +31,60 @@ namespace Sudoku
         /// <returns></returns>
         public SudokuBoard RotateCounterClockwise()
         {
-            var temp = new int[MAX_CELLS, MAX_CELLS];
+            var board = new SudokuBoard();
             for (int fRow = 0, tCol = 0; fRow < MAX_CELLS; fRow++, tCol++)
             {
                 for (int fCol = MAX_CELLS - 1, tRow = 0; fCol >= 0; fCol--, tRow++)
                 {
-                    temp[tRow, tCol] = _data[fRow, fCol];
+                    board[tRow, tCol] = this[fRow, fCol];
                 }
             }
-
-            return new SudokuBoard(temp);
+            
+            return board;
         }
 
         /// <summary>
-        /// Rotate Baord Clockwise
+        /// Rotate Board Clockwise
         /// </summary>
         /// <returns></returns>
         public SudokuBoard RotateClockwise()
         {
-            var temp = new int[MAX_CELLS, MAX_CELLS];
+            var board = new SudokuBoard();
             for (int fRow = 0, tCol = MAX_CELLS - 1; fRow < MAX_CELLS; fRow++, tCol--)
             {
                 for (int fCol = 0, tRow = 0; fCol < MAX_CELLS; fCol++, tRow++)
                 {
-                    temp[tRow, tCol] = _data[fRow, fCol];
+                    board[tRow, tCol] = this[fRow, fCol];
                 }
             }
 
-            return new SudokuBoard(temp);
+            return board;
         }
 
         public SudokuBoard SwapColumns(int colA, int colB)
         {
-            var result = CloneData();
+            var board = Clone();
             for (var row = 0; row < MAX_CELLS; row++)
             {
-                var swap = result[row, colA];
-                result[row, colA] = result[row, colB];
-                result[row, colB] = swap;
+                var swap = board[row, colA];
+                board[row, colA] = board[row, colB];
+                board[row, colB] = swap;
             }
 
-            return new SudokuBoard(result);
+            return board;
         }
 
         public SudokuBoard SwapRows(int rowA, int rowB)
         {
-            if (rowA < 0 || rowA >= MAX_CELLS || rowB < 0 || rowB >= MAX_CELLS)
-                return null;
-
-            var result = CloneData();
+            var board = Clone();
             for (var col = 0; col < MAX_CELLS; col++)
             {
-                var swap = result[rowA, col];
-                result[rowA, col] = result[rowB, col];
-                result[rowB, col] = swap;
+                var swap = board[rowA, col];
+                board[rowA, col] = board[rowB, col];
+                board[rowB, col] = swap;
             }
 
-            return new SudokuBoard(result);
+            return board;
         }
 
         /// <summary>
@@ -98,20 +95,20 @@ namespace Sudoku
         /// <returns></returns>
         public SudokuBoard SwapRowSegment(int rowSegA, int rowSegB)
         {
-            var result = CloneData();
+            var board = Clone();
             var rowAStart = rowSegA * 3;
             var rowBStart = rowSegB * 3;
             for (var rowOffset = 0; rowOffset < 3; rowOffset++)
             {
                 for (var col = 0; col < MAX_CELLS; col++)
                 {
-                    var swap = result[rowAStart + rowOffset, col];
-                    result[rowAStart + rowOffset, col] = result[rowBStart, col];
-                    result[rowBStart + rowOffset, col] = swap;
+                    var swap = board[rowAStart + rowOffset, col];
+                    board[rowAStart + rowOffset, col] = board[rowBStart + rowOffset, col];
+                    board[rowBStart + rowOffset, col] = swap;
                 }
             }
 
-            return new SudokuBoard(result);
+            return board;
         }
 
         /// <summary>
@@ -122,34 +119,80 @@ namespace Sudoku
         /// <returns></returns>
         public SudokuBoard SwapColumnSegment(int colSegA, int colSegB)
         {
-            var result = CloneData();
+            var board = Clone();
             var colAStart = colSegA * 3;
             var colBStart = colSegB * 3;
             for (var colOffset = 0; colOffset < 3; colOffset++)
             {
                 for (var row = 0; row < MAX_CELLS; row++)
                 {
-                    var swap = result[row, colAStart + colOffset];
-                    result[row, colAStart + colOffset] = result[row, colBStart];
-                    result[row, colBStart + colOffset] = swap;
+                    var swap = board[row, colAStart + colOffset];
+                    board[row, colAStart + colOffset] = board[row, colBStart + colOffset];
+                    board[row, colBStart + colOffset] = swap;
                 }
             }
 
-            return new SudokuBoard(result);
+            return board;
         }
 
-        private int[,] CloneData()
+        public bool IsBoardPermutation(SudokuBoard board)
         {
-            var result = new int[MAX_CELLS, MAX_CELLS];
+            return IsColumnSegmentPermutation(board, 0) && 
+                   IsColumnSegmentPermutation(board, 1) && 
+                   IsColumnSegmentPermutation(board, 2);
+        }
+
+        public bool IsColumnSegmentPermutation(SudokuBoard board, int colSeg)
+        {
+            var colSegStart = colSeg * 3;
+
+            for (var perm = 0; perm < 6; perm++) // There can be 6 different permutations for 3 columns
+            {
+                if (TestColumnSegmentPermutation(board, colSegStart))
+                {
+                    return true;
+                }
+                
+                if (perm % 2 == 0)
+                {
+                    _data = SwapColumns(colSegStart + 1, colSegStart + 2)._data;
+                }
+                else
+                {
+                    _data = SwapColumns(colSegStart + 0, colSegStart + 2)._data;
+                }
+            }
+
+            return false;
+        }
+
+        private bool TestColumnSegmentPermutation(SudokuBoard board, int colSegStart)
+        {
+            for (var row = 0; row < MAX_CELLS; row++)
+            {
+                for (var col = colSegStart; col < colSegStart + 3; col++)
+                {
+                    if (board[row, col] != 0 && this[row, col] != board[row, col])
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        public SudokuBoard Clone()
+        {
+            var board = new SudokuBoard();
             for (var row = 0; row < MAX_CELLS; row++)
             {
                 for (var col = 0; col < MAX_CELLS; col++)
                 {
-                    result[row, col] = _data[row, col];
+                    board[row, col] = this[row, col];
                 }
             }
 
-            return result;
+            return board;
         }
 
         public override string ToString()
@@ -159,7 +202,7 @@ namespace Sudoku
             {
                 for (var j = 0; j < MAX_CELLS; j++)
                 {
-                    str.Append(_data[i, j] + "   ");
+                    str.Append(this[i, j] + "   ");
                 }
 
                 str.AppendLine();
@@ -168,6 +211,10 @@ namespace Sudoku
             return str.ToString();
         }
 
-        public int this[int i, int j] => _data[i, j];
+        public int this[int i, int j]
+        {
+            get { return _data[i, j]; }
+            private set { _data[i, j] = value; }
+        }
     }
 }
