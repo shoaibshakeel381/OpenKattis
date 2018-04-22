@@ -3,7 +3,7 @@
     /// <summary>
     /// This class will try to check if one sudoku board 
     /// can be derived from the other
-    /// </summary>                         oldBoard
+    /// </summary>
     internal class SudokuBoardMatcher
     {
         public bool Match(SudokuBoard oldBoard, SudokuBoard newBoard)
@@ -14,7 +14,6 @@
                 // Try swapping row regions
                 for (var rowseg = 0; rowseg < 6; rowseg++)
                 {
-
                     // Try swapping rows in First 3x9 Band
                     for (var row0 = 0; row0 < 6; row0++)
                     {
@@ -28,7 +27,7 @@
                                 for (var colseg = 0; colseg < 6; colseg++)
                                 {
                                     // Try matching board
-                                    if (oldBoard.IsBoardPermutation(newBoard))
+                                    if (IsBoardPermutation(oldBoard, newBoard))
                                     {
                                         return true;
                                     }
@@ -46,6 +45,52 @@
             }
 
             return false;
+        }
+
+        public bool IsBoardPermutation(SudokuBoard oldBoard, SudokuBoard newBoard)
+        {
+            return IsColumnSegmentPermutation(oldBoard, newBoard, 0) &&
+                   IsColumnSegmentPermutation(oldBoard, newBoard, 1) &&
+                   IsColumnSegmentPermutation(oldBoard, newBoard, 2);
+        }
+
+        public bool IsColumnSegmentPermutation(SudokuBoard oldBoard, SudokuBoard newBoard, int colSeg)
+        {
+            var colSegStart = colSeg * 3;
+
+            for (var perm = 0; perm < 6; perm++) // There can be 6 different permutations for 3 columns
+            {
+                if (TestColumnSegmentPermutation(oldBoard, newBoard, colSegStart))
+                {
+                    return true;
+                }
+
+                if (perm % 2 == 0)
+                {
+                    oldBoard = oldBoard.SwapColumns(colSegStart + 1, colSegStart + 2);
+                }
+                else
+                {
+                    oldBoard = oldBoard.SwapColumns(colSegStart + 0, colSegStart + 2);
+                }
+            }
+
+            return false;
+        }
+
+        private bool TestColumnSegmentPermutation(SudokuBoard oldBoard, SudokuBoard newBoard, int colSegStart)
+        {
+            for (var row = 0; row < SudokuBoard.MAX_CELLS; row++)
+            {
+                for (var col = colSegStart; col < colSegStart + 3; col++)
+                {
+                    if (newBoard[row, col] != 0 && oldBoard[row, col] != newBoard[row, col])
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
     }
 }

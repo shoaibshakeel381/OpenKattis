@@ -135,52 +135,6 @@ namespace Sudoku
             return board;
         }
 
-        public bool IsBoardPermutation(SudokuBoard board)
-        {
-            return IsColumnSegmentPermutation(board, 0) && 
-                   IsColumnSegmentPermutation(board, 1) && 
-                   IsColumnSegmentPermutation(board, 2);
-        }
-
-        public bool IsColumnSegmentPermutation(SudokuBoard board, int colSeg)
-        {
-            var colSegStart = colSeg * 3;
-
-            for (var perm = 0; perm < 6; perm++) // There can be 6 different permutations for 3 columns
-            {
-                if (TestColumnSegmentPermutation(board, colSegStart))
-                {
-                    return true;
-                }
-                
-                if (perm % 2 == 0)
-                {
-                    _data = SwapColumns(colSegStart + 1, colSegStart + 2)._data;
-                }
-                else
-                {
-                    _data = SwapColumns(colSegStart + 0, colSegStart + 2)._data;
-                }
-            }
-
-            return false;
-        }
-
-        private bool TestColumnSegmentPermutation(SudokuBoard board, int colSegStart)
-        {
-            for (var row = 0; row < MAX_CELLS; row++)
-            {
-                for (var col = colSegStart; col < colSegStart + 3; col++)
-                {
-                    if (board[row, col] != 0 && this[row, col] != board[row, col])
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
         public SudokuBoard Clone()
         {
             var board = new SudokuBoard();
